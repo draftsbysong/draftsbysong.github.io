@@ -1,0 +1,98 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  estimateReadingMinutes,
+  formatDate,
+  getPostSlug,
+  getPublishedPosts,
+} from '../../utils/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post, index) => ({
+    params: { slug: getPostSlug(post.id) },
+    props: {
+      post,
+      newerPost: index > 0 ? posts[index - 1] : null,
+      olderPost: index < posts.length - 1 ? posts[index + 1] : null,
+    },
+  }));
+}
+
+const { post, newerPost, olderPost } = Astro.props;
+const { Content, headings } = await render(post);
+const tocHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const showToc = tocHeadings.length >= 2;
+const readingMinutes = estimateReadingMinutes(post.body);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="article-shell">
+    <header class="article-header">
+      <h1 class="article-title">{post.data.title}</h1>
+      <div class="article-meta">
+        <time datetime={post.data.date.toISOString()}>
+          {formatDate(post.data.date)}
+        </time>
+        {post.data.updatedDate && (
+          <span>updated {formatDate(post.data.updatedDate)}</span>
+        )}
+        <span>{readingMinutes} min read</span>
+        {post.data.stage && <span class="stage-badge">{post.data.stage}</span>}
+      </div>
+      {post.data.description && (
+        <p class="article-description">{post.data.description}</p>
+      )}
+    </header>
+
+    {showToc && (
+      <>
+        <details class="toc-mobile">
+          <summary>Contents</summary>
+          <ul class="toc-list">
+            {tocHeadings.map((h) => (
+              <li class={`depth-${h.depth}`}>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </details>
+
+        <aside class="toc-desktop" aria-label="Table of contents">
+          <p class="toc-desktop-title">Contents</p>
+          <ul class="toc-list">
+            {tocHeadings.map((h) => (
+              <li class={`depth-${h.depth}`}>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {(olderPost || newerPost) && (
+      <nav class="post-nav" aria-label="Adjacent posts">
+        <div>
+          {olderPost && (
+            <a href={`/posts/${getPostSlug(olderPost.id)}/`}>
+              ← {olderPost.data.title}
+            </a>
+          )}
+        </div>
+        <div>
+          {newerPost && (
+            <a href={`/posts/${getPostSlug(newerPost.id)}/`}>
+              {newerPost.data.title} →
+            </a>
+          )}
+        </div>
+      </nav>
+    )}
+  </article>
+</BaseLayout>

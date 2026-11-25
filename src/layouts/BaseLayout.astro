@@ -1,0 +1,83 @@
+---
+import '../styles/global.css';
+import 'katex/dist/katex.min.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  currentPath?: string;
+}
+
+const {
+  title,
+  description = 'Working drafts, notes, and essays by Song.',
+  currentPath = '',
+} = Astro.props;
+
+const pageTitle = title ? `${title} — Drafts by Song` : 'Drafts by Song';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="Drafts by Song" href="/rss.xml" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = stored || (prefersDark ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="site-title" href="/">Drafts by Song</a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/" aria-current={currentPath === '/' ? 'page' : undefined}>Drafts</a>
+        <a href="/about/" aria-current={currentPath === '/about' ? 'page' : undefined}>About</a>
+        <a href="/rss.xml">RSS</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle color theme">
+          theme
+        </button>
+      </nav>
+    </header>
+
+    <main class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <span>Drafts by Song</span>
+      <span>
+        <a href="https://github.com/draftsbysong">GitHub</a>
+        {' · '}
+        <a href="/rss.xml">RSS</a>
+      </span>
+    </footer>
+
+    <script is:inline>
+      (function () {
+        const btn = document.getElementById('theme-toggle');
+        if (!btn) return;
+        const syncLabel = () => {
+          const current = document.documentElement.getAttribute('data-theme');
+          btn.textContent = current === 'dark' ? 'light' : 'dark';
+        };
+        syncLabel();
+        btn.addEventListener('click', () => {
+          const current = document.documentElement.getAttribute('data-theme');
+          const next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('theme', next);
+          syncLabel();
+        });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About" description="About Drafts by Song." currentPath="/about">
+  <article class="prose">
+    <h1 class="article-title" style="margin-bottom: 1.5rem;">About</h1>
+
+    <p>
+      <strong>Drafts by Song</strong> is a personal space for working drafts,
+      structured notes, and long-form essays.
+    </p>
+
+    <p>
+      Entries are marked by stage—<code>note</code>, <code>draft</code>, or
+      <code>essay</code>—and revised as models improve or counterexamples appear.
+    </p>
+
+    <h2>Colophon</h2>
+    <ul>
+      <li>Built with <a href="https://astro.build">Astro</a> and static HTML/CSS.</li>
+      <li>Math rendered with KaTeX; source hosted on <a href="https://github.com/draftsbysong/draftsbysong.github.io">GitHub</a>.</li>
+      <li>Updates available via <a href="/rss.xml">RSS</a>.</li>
+    </ul>
+  </article>
+</BaseLayout>
